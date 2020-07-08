@@ -1,8 +1,13 @@
 {
   "name": "httpx-server",
   "version": "0.0.0",
-  "description": "An awesome package",
-  "keywords": [],
+  "description": "Respond to encrypted and unencrypted HTTP/1.1 and HTTP/2 requests on the same port",
+  "keywords": [
+    "http",
+    "http2",
+    "h2c",
+    "tls"
+  ],
   "homepage": "https://github.com/vinsonchuong/httpx-server",
   "bugs": "https://github.com/vinsonchuong/httpx-server/issues",
   "license": "MIT",
@@ -16,7 +21,10 @@
   "dependencies": {},
   "devDependencies": {
     "ava": "^3.10.0",
+    "got": "^11.4.0",
+    "make-cert": "^1.1.0",
     "semantic-release": "^17.1.1",
+    "ws": "^7.3.1",
     "xo": "^0.32.1"
   },
   "ava": {
