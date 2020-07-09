@@ -28,13 +28,17 @@
     "xo": "^0.32.1"
   },
   "ava": {
-    "verbose": true
+    "verbose": true,
+    "nonSemVerExperiments": {
+      "likeAssertion": true
+    }
   },
   "xo": {
     "prettier": true,
     "space": 2,
     "semicolon": false,
     "rules": {
+      "ava/use-t-well": "off",
       "import/extensions": "off",
       "import/no-anonymous-default-export": "off",
       "import/no-useless-path-segments": "off",

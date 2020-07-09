@@ -24,17 +24,14 @@ test('responding to both http and https requests', async (t) => {
     server.net.listen(10000, resolve)
   })
 
-  {
-    const response = await got('http://localhost:10000')
-    t.is(response.body, 'Hello World!')
-  }
+  t.like(await got('http://localhost:10000'), {body: 'Hello World!'})
 
-  {
-    const response = await got('https://localhost:10000', {
+  t.like(
+    await got('https://localhost:10000', {
       https: {rejectUnauthorized: false}
-    })
-    t.is(response.body, 'Hello World!')
-  }
+    }),
+    {body: 'Hello World!'}
+  )
 
   {
     const ws = new WebSocket('ws://localhost:10000')
