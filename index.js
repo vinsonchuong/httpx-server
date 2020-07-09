@@ -3,7 +3,7 @@ import * as http from 'http'
 import * as http2 from 'http2'
 
 export function createServer(options, handler) {
-  const httpServer = http.createServer(handler)
+  const httpServer = http.createServer(options, handler)
   const http2Server = http2.createSecureServer(
     {...options, allowHTTP1: true},
     handler
