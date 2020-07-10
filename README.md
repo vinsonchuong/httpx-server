@@ -19,14 +19,14 @@ Start a server like so:
 ```js
 import * as httpx from 'httpx-server'
 
-const { net, http, http2 } = httpx.createServer(
+const server = httpx.createServer(
   { key, cert },
   (request, response) => {
     response.end('Hello World!')
   }
 )
 
-net.listen(8080)
+server.listen(8080)
 ```
 
 This starts a
@@ -44,12 +44,18 @@ Because
 only supported over TLS, there's no way to negotiate between HTTP/1.1 and HTTP/2
 over an unencrypted connection; so, we just assume HTTP/1.1.
 
+The returned `server` object behaves like an
+[`http.Server`](https://nodejs.org/docs/latest/api/http.html#http_class_http_server)
+or
+[`http2.Http2SecureServer`](https://nodejs.org/docs/latest/api/http2.html#http2_class_http2secureserver).
+Properties, methods, and events common to both are implemented on this object.
+In other words, binding an event listener to this object binds event listeners
+to both the HTTP/1.1 and HTTP/2 server objects.
+
 Requests are routed from `net.Server` to either `http.Server` or
 `http2.Http2SecureServer` using the
 [`connection` event](https://nodejs.org/api/http.html#http_event_connection).
 
 WebSocket is supported, both encrypted and unencrypted. `ws` has a
-[usage example](https://github.com/websockets/ws#external-https-server) for
-starting a server. That example will work with both the `http` and `http2`
-server objects returned above. However, WebSocket over HTTP/2 is not yet
-supported.
+[usage example](https://github.com/websockets/ws#external-https-server) that
+works with the `server` object returned by `httpx.createServer`.

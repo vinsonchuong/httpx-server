@@ -1,27 +1,27 @@
 import test from 'ava'
 import * as httpx from './index.js'
+import * as http2 from 'http2'
 import makeCert from 'make-cert'
 import got from 'got'
 import WebSocket from 'ws'
+import getStream from 'get-stream'
 
 test('responding to both http and https requests', async (t) => {
   const {key, cert} = makeCert('localhost')
   const server = httpx.createServer({key, cert}, (request, response) => {
     response.end('Hello World!')
   })
-
-  const wsServer = new WebSocket.Server({server: server.http})
-  wsServer.on('connection', (ws) => {
-    ws.send('Hello World!')
+  t.teardown(() => {
+    server.close()
   })
 
-  const wssServer = new WebSocket.Server({server: server.http2})
-  wssServer.on('connection', (ws) => {
+  const wss = new WebSocket.Server({server})
+  wss.on('connection', (ws) => {
     ws.send('Hello World!')
   })
 
   await new Promise((resolve) => {
-    server.net.listen(10000, resolve)
+    server.listen(10000, resolve)
   })
 
   t.like(await got('http://localhost:10000'), {body: 'Hello World!'})
@@ -34,17 +34,39 @@ test('responding to both http and https requests', async (t) => {
   )
 
   {
+    const client = http2.connect('https://localhost:10000', {
+      rejectUnauthorized: false
+    })
+    t.teardown(() => {
+      client.close()
+    })
+
+    const request = client.request({':path': '/'})
+    t.is(await getStream(request), 'Hello World!')
+    client.close()
+  }
+
+  {
     const ws = new WebSocket('ws://localhost:10000')
+    t.teardown(() => {
+      ws.close()
+    })
+
     const message = await new Promise((resolve) => {
       ws.once('message', resolve)
     })
     t.is(message, 'Hello World!')
+    ws.close()
   }
 
   {
     const ws = new WebSocket('wss://localhost:10000', {
       rejectUnauthorized: false
     })
+    t.teardown(() => {
+      ws.close()
+    })
+
     const message = await new Promise((resolve) => {
       ws.once('message', resolve)
     })

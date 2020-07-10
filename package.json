@@ -21,6 +21,7 @@
   "dependencies": {},
   "devDependencies": {
     "ava": "^3.10.0",
+    "get-stream": "^5.1.0",
     "got": "^11.4.0",
     "make-cert": "^1.1.0",
     "semantic-release": "^17.1.1",
