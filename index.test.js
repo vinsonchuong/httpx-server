@@ -1,6 +1,6 @@
 import test from 'ava'
-import * as httpx from './index.js'
 import * as http2 from 'http2'
+import * as httpx from './index.js'
 import makeCert from 'make-cert'
 import got from 'got'
 import WebSocket from 'ws'
@@ -26,6 +26,15 @@ test('responding to both http and https requests', async (t) => {
 
   t.like(await got('http://localhost:10000'), {body: 'Hello World!'})
 
+  {
+    const client = http2.connect('http://localhost:10000')
+    t.teardown(() => client.close())
+
+    const request = client.request({':path': '/'})
+    t.teardown(() => request.end())
+    t.is(await getStream(request), 'Hello World!')
+  }
+
   t.like(
     await got('https://localhost:10000', {
       https: {rejectUnauthorized: false}
@@ -33,18 +42,13 @@ test('responding to both http and https requests', async (t) => {
     {body: 'Hello World!'}
   )
 
-  {
-    const client = http2.connect('https://localhost:10000', {
-      rejectUnauthorized: false
-    })
-    t.teardown(() => {
-      client.close()
-    })
-
-    const request = client.request({':path': '/'})
-    t.is(await getStream(request), 'Hello World!')
-    client.close()
-  }
+  t.like(
+    await got('https://localhost:10000', {
+      http2: true,
+      https: {rejectUnauthorized: false}
+    }),
+    {body: 'Hello World!'}
+  )
 
   {
     const ws = new WebSocket('ws://localhost:10000')

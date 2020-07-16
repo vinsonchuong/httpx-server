@@ -35,25 +35,32 @@ examines the first byte of each request. If the first byte is 22 (0x16), we
 know that the client is
 [negotiating a TLS connection](https://tls.ulfheim.net/), which we then route
 to an
-[HTTP/2 server](https://nodejs.org/api/http2.html#http2_compatibility_api) that
-can handle both HTTP/1.1 and HTTP/2 requests over TLS. Otherwise, the request is
-routed to an
+[HTTP/2 server](https://nodejs.org/api/http2.html#http2_class_http2secureserver)
+that can handle both HTTP/1.1 and HTTP/2 requests over TLS. Otherwise, if the
+request includes the text `HTTP/1.1`, it is routed to an
 [HTTP/1.1 server](https://nodejs.org/api/http.html#http_http_createserver_options_requestlistener).
-Because
-[ALPN](https://en.wikipedia.org/wiki/Application-Layer_Protocol_Negotiation) is
-only supported over TLS, there's no way to negotiate between HTTP/1.1 and HTTP/2
-over an unencrypted connection; so, we just assume HTTP/1.1.
+And, if the request includes the text `HTTP/2`, it is routed to a
+[clear text HTTP/2 server](https://nodejs.org/api/http2.html#http2_class_http2server).
+
+The code for differentiating between unencrypted HTTP/1.1 and HTTP/2 requests
+relies on currently deprecated code. There's an [outstanding issue to undeprecate
+that code](https://github.com/nodejs/node/issues/34296).
+
+Upgrading from unencrypted HTTP/1.1 to HTTP/2 via the `Upgrade` header is not
+supported.
 
 The returned `server` object behaves like an
 [`http.Server`](https://nodejs.org/docs/latest/api/http.html#http_class_http_server)
+or
+[`http2.Http2Server`](https://nodejs.org/api/http2.html#http2_class_http2server)
 or
 [`http2.Http2SecureServer`](https://nodejs.org/docs/latest/api/http2.html#http2_class_http2secureserver).
 Properties, methods, and events common to both are implemented on this object.
 In other words, binding an event listener to this object binds event listeners
 to both the HTTP/1.1 and HTTP/2 server objects.
 
-Requests are routed from `net.Server` to either `http.Server` or
-`http2.Http2SecureServer` using the
+Requests are routed from `net.Server` to `http.Server` or `http2.Http2Server`
+or `http2.Http2SecureServer` using the
 [`connection` event](https://nodejs.org/api/http.html#http_event_connection).
 
 WebSocket is supported, both encrypted and unencrypted. `ws` has a
