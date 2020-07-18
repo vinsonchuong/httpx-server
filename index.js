@@ -20,20 +20,25 @@ const httpServerEvents = new Set([
 ])
 
 export class Server extends net.Server {
-  constructor(options, requestListener) {
+  constructor(...args) {
+    const options = args[0] && typeof args[0] === 'object' ? args[0] : {}
+    const requestListener = typeof args[0] === 'function' ? args[0] : args[1]
+
+    const hasCert = (options.cert && options.key) || options.pfx
+
     super((socket) => {
       socket.once('data', async (buffer) => {
         socket.pause()
         socket.unshift(buffer)
 
-        if (buffer[0] === 22) {
+        if (hasCert && buffer[0] === 22) {
           this.http2.emit('connection', socket)
         } else {
           socket.resume()
-          if (buffer.includes('HTTP/1.1')) {
-            this.http.emit('connection', socket)
-          } else if (buffer.includes('HTTP/2.0')) {
+          if (buffer.includes('HTTP/2.0')) {
             this.http2c.emit('connection', new JSStreamSocket(socket))
+          } else {
+            this.http.emit('connection', socket)
           }
         }
       })
@@ -41,23 +46,31 @@ export class Server extends net.Server {
 
     this.http = http.createServer(options, requestListener)
     this.http2c = http2.createServer(options, requestListener)
-    this.http2 = http2.createSecureServer(
-      {...options, allowHTTP1: true},
-      requestListener
-    )
+
+    if (hasCert) {
+      this.http2 = http2.createSecureServer(
+        {...options, allowHTTP1: true},
+        requestListener
+      )
+    }
 
     this.on('newListener', (eventName, listener) => {
       if (httpServerEvents.has(eventName)) {
         this.http.on(eventName, listener)
         this.http2c.on(eventName, listener)
-        this.http2.on(eventName, listener)
+
+        // eslint-disable-next-line no-unused-expressions
+        this.http2?.on(eventName, listener)
       }
     })
+
     this.on('removeListener', (eventName, listener) => {
       if (httpServerEvents.has(eventName)) {
         this.http.off(eventName, listener)
         this.http2c.off(eventName, listener)
-        this.http2.off(eventName, listener)
+
+        // eslint-disable-next-line no-unused-expressions
+        this.http2?.off(eventName, listener)
       }
     })
   }
@@ -65,7 +78,9 @@ export class Server extends net.Server {
   setTimeout(...args) {
     this.http.setTimeout(...args)
     this.http2c.setTimeout(...args)
-    this.http2.setTimeout(...args)
+
+    // eslint-disable-next-line no-unused-expressions
+    this.http2?.setTimeout(...args)
   }
 
   get timeout() {
@@ -75,7 +90,9 @@ export class Server extends net.Server {
   set timeout(value) {
     this.http.timeout = value
     this.http2c.timeout = value
-    this.http2.timeout = value
+    if (this.http2) {
+      this.http2.timeout = value
+    }
   }
 }
 

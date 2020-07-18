@@ -11,6 +11,10 @@ test('responding to both http and https requests', async (t) => {
   const server = httpx.createServer({key, cert}, (request, response) => {
     response.end('Hello World!')
   })
+
+  await new Promise((resolve) => {
+    server.listen(10000, resolve)
+  })
   t.teardown(() => {
     server.close()
   })
@@ -18,10 +22,6 @@ test('responding to both http and https requests', async (t) => {
   const wss = new WebSocket.Server({server})
   wss.on('connection', (ws) => {
     ws.send('Hello World!')
-  })
-
-  await new Promise((resolve) => {
-    server.listen(10000, resolve)
   })
 
   t.like(await got('http://localhost:10000'), {body: 'Hello World!'})
@@ -75,5 +75,29 @@ test('responding to both http and https requests', async (t) => {
       ws.once('message', resolve)
     })
     t.is(message, 'Hello World!')
+  }
+})
+
+test('optionally skipping TLS', async (t) => {
+  const server = httpx.createServer((request, response) => {
+    response.end('Hello World!')
+  })
+
+  await new Promise((resolve) => {
+    server.listen(10001, resolve)
+  })
+  t.teardown(() => {
+    server.close()
+  })
+
+  t.like(await got('http://localhost:10001'), {body: 'Hello World!'})
+
+  {
+    const client = http2.connect('http://localhost:10001')
+    t.teardown(() => client.close())
+
+    const request = client.request({':path': '/'})
+    t.teardown(() => request.end())
+    t.is(await getStream(request), 'Hello World!')
   }
 })
