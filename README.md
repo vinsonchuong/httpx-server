@@ -18,6 +18,9 @@ Start a server like so:
 
 ```js
 import * as httpx from 'httpx-server'
+import makeCert from 'make-cert'
+
+const { key, cert } = makeCert('localhost')
 
 const server = httpx.createServer(
   { key, cert },
