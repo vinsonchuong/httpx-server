@@ -45,6 +45,9 @@ request includes the text `HTTP/1.1`, it is routed to an
 And, if the request includes the text `HTTP/2`, it is routed to a
 [clear text HTTP/2 server](https://nodejs.org/api/http2.html#http2_class_http2server).
 
+Enabling TLS is optional. If no certificate is passed in, the server will
+function, just without TLS support.
+
 The code for differentiating between unencrypted HTTP/1.1 and HTTP/2 requests
 relies on currently deprecated code. There's an [outstanding issue to undeprecate
 that code](https://github.com/nodejs/node/issues/34296).
