@@ -2,9 +2,6 @@ import * as net from 'net'
 import * as http from 'http'
 import * as http2 from 'http2'
 
-// eslint-disable-next-line node/no-deprecated-api
-import JSStreamSocket from '_stream_wrap'
-
 const httpServerEvents = new Set([
   'checkContinue',
   'checkExpectation',
@@ -33,13 +30,12 @@ export class Server extends net.Server {
 
         if (hasCert && buffer[0] === 22) {
           this.http2.emit('connection', socket)
+        } else if (buffer.includes('HTTP/2.0')) {
+          const {default: JSStreamSocket} = await import('_stream_wrap')
+          this.http2c.emit('connection', new JSStreamSocket(socket))
         } else {
           socket.resume()
-          if (buffer.includes('HTTP/2.0')) {
-            this.http2c.emit('connection', new JSStreamSocket(socket))
-          } else {
-            this.http.emit('connection', socket)
-          }
+          this.http.emit('connection', socket)
         }
       })
     })
