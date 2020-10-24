@@ -54,8 +54,6 @@ export class Server extends net.Server {
       if (httpServerEvents.has(eventName)) {
         this.http.on(eventName, listener)
         this.http2c.on(eventName, listener)
-
-        // eslint-disable-next-line no-unused-expressions
         this.http2?.on(eventName, listener)
       }
     })
@@ -64,8 +62,6 @@ export class Server extends net.Server {
       if (httpServerEvents.has(eventName)) {
         this.http.off(eventName, listener)
         this.http2c.off(eventName, listener)
-
-        // eslint-disable-next-line no-unused-expressions
         this.http2?.off(eventName, listener)
       }
     })
@@ -74,8 +70,6 @@ export class Server extends net.Server {
   setTimeout(...args) {
     this.http.setTimeout(...args)
     this.http2c.setTimeout(...args)
-
-    // eslint-disable-next-line no-unused-expressions
     this.http2?.setTimeout(...args)
   }
 

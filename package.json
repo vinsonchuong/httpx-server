@@ -20,19 +20,16 @@
   "type": "module",
   "dependencies": {},
   "devDependencies": {
-    "ava": "^3.10.0",
-    "get-stream": "^5.1.0",
-    "got": "^11.4.0",
+    "ava": "^3.13.0",
+    "get-stream": "^6.0.0",
+    "got": "^11.8.0",
     "make-cert": "^1.1.0",
-    "semantic-release": "^17.1.1",
+    "semantic-release": "^17.2.1",
     "ws": "^7.3.1",
-    "xo": "^0.32.1"
+    "xo": "^0.34.1"
   },
   "ava": {
-    "verbose": true,
-    "nonSemVerExperiments": {
-      "likeAssertion": true
-    }
+    "verbose": true
   },
   "xo": {
     "prettier": true,
