@@ -101,3 +101,43 @@ test('optionally skipping TLS', async (t) => {
     t.is(await getStream(request), 'Hello World!')
   }
 })
+
+test('supporting server push', async (t) => {
+  const {HTTP2_HEADER_METHOD, HTTP2_HEADER_PATH} = http2.constants
+
+  const server = httpx.createServer((request, response) => {
+    response.createPushResponse(
+      {
+        [HTTP2_HEADER_METHOD]: 'GET',
+        [HTTP2_HEADER_PATH]: '/one'
+      },
+      (error, response) => {
+        response.writeHead(200, {})
+        response.end('Push for /one')
+      }
+    )
+
+    response.end('Hello World!')
+  })
+
+  await new Promise((resolve) => {
+    server.listen(10002, resolve)
+  })
+  t.teardown(() => {
+    server.close()
+  })
+
+  const client = http2.connect('http://localhost:10002')
+  t.teardown(() => client.close())
+
+  await new Promise((resolve) => {
+    client.on('stream', async (stream, headers) => {
+      t.is(headers[HTTP2_HEADER_PATH], '/one')
+      t.is(await getStream(stream), 'Push for /one')
+      resolve()
+    })
+
+    const request = client.request({':path': '/'})
+    t.teardown(() => request.end())
+  })
+})
