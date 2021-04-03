@@ -6,3 +6,5 @@ jobs:
     steps:
       - if: ${{ github.actor == 'dependabot[bot]' }}
         run: gh pr merge --auto --merge ${{ github.event.pull_request.html_url }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
