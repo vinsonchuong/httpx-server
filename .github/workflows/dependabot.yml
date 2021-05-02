@@ -1,10 +1,10 @@
 name: Dependabot
-on: pull_request
+on: pull_request_target
 jobs:
   dependabot:
     runs-on: ubuntu-latest
     steps:
-      - if: ${{ github.actor == 'dependabot[bot]' }}
+      - if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
         run: gh pr merge --auto --merge ${{ github.event.pull_request.html_url }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
