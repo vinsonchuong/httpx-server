@@ -13,6 +13,7 @@
   "license": "MIT",
   "author": "Vinson Chuong <vinsonchuong@gmail.com>",
   "repository": "vinsonchuong/httpx-server",
+  "main": "index.js",
   "scripts": {
     "test": "xo && ava",
     "release": "semantic-release"
