@@ -1,6 +1,6 @@
-import * as net from 'net'
-import * as http from 'http'
-import * as http2 from 'http2'
+import * as net from 'node:net'
+import * as http from 'node:http'
+import * as http2 from 'node:http2'
 
 const httpServerEvents = new Set([
   'checkContinue',

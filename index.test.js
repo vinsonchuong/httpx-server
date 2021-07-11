@@ -1,10 +1,10 @@
+import * as http2 from 'node:http2'
 import test from 'ava'
-import * as http2 from 'http2'
-import * as httpx from './index.js'
 import makeCert from 'make-cert'
 import got from 'got'
 import WebSocket from 'ws'
 import getStream from 'get-stream'
+import * as httpx from './index.js'
 
 test('responding to both http and https requests', async (t) => {
   const {key, cert} = makeCert('localhost')
@@ -13,7 +13,7 @@ test('responding to both http and https requests', async (t) => {
   })
 
   await new Promise((resolve) => {
-    server.listen(10000, resolve)
+    server.listen(10_000, resolve)
   })
   t.teardown(() => {
     server.close()
@@ -84,7 +84,7 @@ test('optionally skipping TLS', async (t) => {
   })
 
   await new Promise((resolve) => {
-    server.listen(10001, resolve)
+    server.listen(10_001, resolve)
   })
   t.teardown(() => {
     server.close()
@@ -121,7 +121,7 @@ test('supporting server push', async (t) => {
   })
 
   await new Promise((resolve) => {
-    server.listen(10002, resolve)
+    server.listen(10_002, resolve)
   })
   t.teardown(() => {
     server.close()
