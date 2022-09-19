@@ -1,6 +1,8 @@
 import * as net from 'node:net'
+import * as tls from 'node:tls'
 import * as http from 'node:http'
 import * as http2 from 'node:http2'
+import * as stream from 'node:stream'
 
 const httpServerEvents = new Set([
   'checkContinue',
@@ -20,6 +22,9 @@ export class Server extends net.Server {
   constructor(...args) {
     const options = args[0] && typeof args[0] === 'object' ? args[0] : {}
     const requestListener = typeof args[0] === 'function' ? args[0] : args[1]
+    // see: github.com/szmarczak/http2-wrapper/blob/51eeaf59/source/utils/js-stream-socket.js
+    // alt: github.com/httptoolkit/httpolyglot/commit/8aa882f7
+    const JSStreamSocket = (new tls.TLSSocket(new stream.PassThrough()))._handle._parentWrap.constructor;
 
     const hasCert = (options.cert && options.key) || options.pfx
 
@@ -31,7 +36,6 @@ export class Server extends net.Server {
         if (hasCert && buffer[0] === 22) {
           this.http2.emit('connection', socket)
         } else if (buffer.includes('HTTP/2.0')) {
-          const {default: JSStreamSocket} = await import('_stream_wrap')
           this.http2c.emit('connection', new JSStreamSocket(socket))
         } else {
           socket.resume()
