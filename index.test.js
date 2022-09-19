@@ -2,7 +2,7 @@ import * as http2 from 'node:http2'
 import test from 'ava'
 import makeCert from 'make-cert'
 import got from 'got'
-import WebSocket from 'ws'
+import WebSocket, {WebSocketServer} from 'ws'
 import getStream from 'get-stream'
 import * as httpx from './index.js'
 
@@ -19,7 +19,7 @@ test('responding to both http and https requests', async (t) => {
     server.close()
   })
 
-  const wss = new WebSocket.Server({server})
+  const wss = new WebSocketServer({server})
   wss.on('connection', (ws) => {
     ws.send('Hello World!')
   })
@@ -37,17 +37,17 @@ test('responding to both http and https requests', async (t) => {
 
   t.like(
     await got('https://localhost:10000', {
-      https: {rejectUnauthorized: false}
+      https: {rejectUnauthorized: false},
     }),
-    {body: 'Hello World!'}
+    {body: 'Hello World!'},
   )
 
   t.like(
     await got('https://localhost:10000', {
       http2: true,
-      https: {rejectUnauthorized: false}
+      https: {rejectUnauthorized: false},
     }),
-    {body: 'Hello World!'}
+    {body: 'Hello World!'},
   )
 
   {
@@ -59,13 +59,13 @@ test('responding to both http and https requests', async (t) => {
     const message = await new Promise((resolve) => {
       ws.once('message', resolve)
     })
-    t.is(message, 'Hello World!')
+    t.is(message.toString(), 'Hello World!')
     ws.close()
   }
 
   {
     const ws = new WebSocket('wss://localhost:10000', {
-      rejectUnauthorized: false
+      rejectUnauthorized: false,
     })
     t.teardown(() => {
       ws.close()
@@ -74,7 +74,7 @@ test('responding to both http and https requests', async (t) => {
     const message = await new Promise((resolve) => {
       ws.once('message', resolve)
     })
-    t.is(message, 'Hello World!')
+    t.is(message.toString(), 'Hello World!')
   }
 })
 
@@ -109,12 +109,12 @@ test('supporting server push', async (t) => {
     response.createPushResponse(
       {
         [HTTP2_HEADER_METHOD]: 'GET',
-        [HTTP2_HEADER_PATH]: '/one'
+        [HTTP2_HEADER_PATH]: '/one',
       },
       (error, response) => {
         response.writeHead(200, {})
         response.end('Push for /one')
-      }
+      },
     )
 
     response.end('Hello World!')

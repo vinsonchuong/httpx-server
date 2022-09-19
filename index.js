@@ -13,7 +13,7 @@ const httpServerEvents = new Set([
   'sessionError',
   'stream',
   'timeout',
-  'unknownProtocol'
+  'unknownProtocol',
 ])
 
 export class Server extends net.Server {
@@ -46,7 +46,7 @@ export class Server extends net.Server {
     if (hasCert) {
       this.http2 = http2.createSecureServer(
         {...options, allowHTTP1: true},
-        requestListener
+        requestListener,
       )
     }
 
