@@ -15,16 +15,18 @@ const httpServerEvents = new Set([
   'sessionError',
   'stream',
   'timeout',
-  'unknownProtocol'
+  'unknownProtocol',
 ])
 
 export class Server extends net.Server {
   constructor(...args) {
     const options = args[0] && typeof args[0] === 'object' ? args[0] : {}
     const requestListener = typeof args[0] === 'function' ? args[0] : args[1]
-    // see: github.com/szmarczak/http2-wrapper/blob/51eeaf59/source/utils/js-stream-socket.js
-    // alt: github.com/httptoolkit/httpolyglot/commit/8aa882f7
-    const JSStreamSocket = (new tls.TLSSocket(new stream.PassThrough()))._handle._parentWrap.constructor;
+
+    // See: https://github.com/szmarczak/http2-wrapper/blob/51eeaf59/source/utils/js-stream-socket.js
+    // See: https://github.com/httptoolkit/httpolyglot/commit/8aa882f7
+    const JSStreamSocket = new tls.TLSSocket(new stream.PassThrough())._handle
+      ._parentWrap.constructor
 
     const hasCert = (options.cert && options.key) || options.pfx
 
@@ -50,7 +52,7 @@ export class Server extends net.Server {
     if (hasCert) {
       this.http2 = http2.createSecureServer(
         {...options, allowHTTP1: true},
-        requestListener
+        requestListener,
       )
     }
 
