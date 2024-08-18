@@ -19,7 +19,6 @@
     "release": "semantic-release"
   },
   "type": "module",
-  "dependencies": {},
   "devDependencies": {
     "ava": "^4.3.3",
     "get-stream": "^6.0.1",
@@ -43,5 +42,6 @@
       "import/no-useless-path-segments": "off",
       "unicorn/import-index": "off"
     }
-  }
+  },
+  "packageManager": "yarn@4.4.0"
 }
