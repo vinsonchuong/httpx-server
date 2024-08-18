@@ -23,6 +23,9 @@ test('responding to both http and https requests', async (t) => {
   wss.on('connection', (ws) => {
     ws.send('Hello World!')
   })
+  t.teardown(() => {
+    wss.close()
+  })
 
   t.like(await got('http://localhost:10000'), {body: 'Hello World!'})
 
@@ -35,16 +38,19 @@ test('responding to both http and https requests', async (t) => {
     t.is(await getStream(request), 'Hello World!')
   }
 
-  t.like(
-    await got('https://localhost:10000', {
-      https: {rejectUnauthorized: false},
-    }),
-    {body: 'Hello World!'},
-  )
+  {
+    const client = http2.connect('https://localhost:10000', {
+      rejectUnauthorized: false,
+    })
+    t.teardown(() => client.close())
+
+    const request = client.request({':path': '/'})
+    t.teardown(() => request.end())
+    t.is(await getStream(request), 'Hello World!')
+  }
 
   t.like(
     await got('https://localhost:10000', {
-      http2: true,
       https: {rejectUnauthorized: false},
     }),
     {body: 'Hello World!'},
@@ -130,7 +136,8 @@ test('supporting server push', async (t) => {
   const client = http2.connect('http://localhost:10002')
   t.teardown(() => client.close())
 
-  await new Promise((resolve) => {
+  /* eslint-disable-next-line no-async-promise-executor */
+  await new Promise(async (resolve) => {
     client.on('stream', async (stream, headers) => {
       t.is(headers[HTTP2_HEADER_PATH], '/one')
       t.is(await getStream(stream), 'Push for /one')
@@ -139,5 +146,6 @@ test('supporting server push', async (t) => {
 
     const request = client.request({':path': '/'})
     t.teardown(() => request.end())
+    t.is(await getStream(request), 'Hello World!')
   })
 })
